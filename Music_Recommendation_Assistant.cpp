@@ -87,6 +87,8 @@ Song library[LIBRARY_SIZE] = {
 // Session playlist (stores library indexes) and listening statistics.
 int  playlist[LIBRARY_SIZE];
 int  playlistCount = 0;
+
+// Listening statistics.
 int  totalRecommendations = 0;
 int  genrePickCount[6] = {0,0,0,0,0,0};   // index 1..5 used
 
@@ -171,6 +173,84 @@ void showWelcome() {
 void newPage() {
     clearScreen();
     showWelcome();
+}
+
+// Scores every song against the user's preferences, prints the ranked top 3,
+// and stores those picks in topResults[] so the caller can add them.
+// Scoring: +50 genre match, +0..40 mood closeness, +20 era match, +5 recency.
+// Returns how many songs were placed in topResults[] (0 to 3).
+int recommendEngine(int genre, int mood, int era, int topResults[]) {
+    int score[LIBRARY_SIZE];
+
+    // Step 1: score every song
+    for (int i = 0; i < LIBRARY_SIZE; i++) {
+        int s = 0;
+
+        if (library[i].genre == genre) s += 50;   // genre match (if-else)
+        else                           s += 0;
+
+        int diff = library[i].energy - mood;      // mood closeness
+        if (diff < 0) diff = -diff;
+        s += (4 - diff) * 10;
+        if (s < 0) s = 0;
+
+        if (era == 1 && library[i].year < 2000) s += 20;              // era (if-else chain)
+        else if (era == 2 && library[i].year >= 2000 && library[i].year <= 2009) s += 20;
+        else if (era == 3 && library[i].year >= 2010) s += 20;
+
+        if (library[i].year >= 2015) s += 5;       // recency bonus
+
+        score[i] = s;
+    }
+
+    // Step 2: print the header
+    cout << "\n----------------------------------------------------------------\n";
+    cout << "   TOP MATCHES FOR: " << genreName(genre)
+         << " | mood " << mood << "/5 | ";
+    if (era == 1)      cout << "Classic (pre-2000)";
+    else if (era == 2) cout << "2000s";
+    else               cout << "2010s & newer";
+    cout << "\n----------------------------------------------------------------\n";
+
+    // Step 3: pick the 3 highest-scoring songs
+    bool usedBefore[LIBRARY_SIZE] = {false};
+    int shown = 0;
+
+    for (int rank = 1; rank <= 3; rank++) {
+        int best = -1, bestScore = -1;
+        for (int i = 0; i < LIBRARY_SIZE; i++) {
+            if (!usedBefore[i] && score[i] > bestScore) {
+                bestScore = score[i];
+                best = i;
+            }
+        }
+        if (best == -1 || bestScore <= 0) break;
+        usedBefore[best] = true;
+
+        string matchLabel;                          // label (if-else)
+        if (bestScore >= 90)      matchLabel = "PERFECT MATCH";
+        else if (bestScore >= 70) matchLabel = "Great match";
+        else if (bestScore >= 50) matchLabel = "Good match";
+        else                      matchLabel = "Might also like";
+
+        cout << "\n  #" << rank << "  " << library[best].title
+             << "  -  " << library[best].artist << "\n";
+        cout << "       Genre: " << genreName(library[best].genre)
+             << " | Energy: " << library[best].energy << "/5"
+             << " | Year: " << library[best].year << "\n";
+        cout << "       [" << matchLabel << "  |  score: " << bestScore << "]\n";
+
+        topResults[shown] = best;
+        shown++;
+    }
+
+    if (shown == 0)
+        cout << "\n  Sorry, no good matches found. Try different options.\n";
+
+    totalRecommendations++;
+    if (genre >= 1 && genre <= 5) genrePickCount[genre]++;
+
+    return shown;
 }
 
 int main()
