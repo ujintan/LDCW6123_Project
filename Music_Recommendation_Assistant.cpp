@@ -175,6 +175,40 @@ void newPage() {
     showWelcome();
 }
 
+// Add one song to the playlist. Prevents duplicates.
+bool addSongToPlaylist(int idx) {
+    for (int i = 0; i < playlistCount; i++) {
+        if (playlist[i] == idx) {
+            cout << "    \"" << library[idx].title
+                 << "\" is already in your playlist.\n";
+            return false;
+        }
+    }
+    playlist[playlistCount++] = idx;
+    cout << "    Added \"" << library[idx].title << "\" to your playlist!\n";
+    return true;
+}
+
+// Offer to add songs from a result list, one by one, until the user types 0.
+void offerToAddSongs(int choices[], int count) {
+    if (count == 0) return;
+    cout << "\nWould you like to add any of these to your playlist?\n";
+    while (true) {
+        cout << "  Enter the number of a song to add (1";
+        if (count > 1) cout << "-" << count;
+        cout << "), or 0 when you're done: ";
+        int pick;
+        if (!readInt(pick)) {
+            cout << "  [!] That wasn't a number. Please try again.\n";
+            continue;
+        }
+        if (pick == 0) { cout << "    Done adding songs.\n"; break; }
+        if (pick >= 1 && pick <= count) addSongToPlaylist(choices[pick - 1]);
+        else cout << "  [!] Please enter a number between 1 and "
+                  << count << ", or 0 to finish.\n";
+    }
+}
+
 // Scores every song against the user's preferences, prints the ranked top 3,
 // and stores those picks in topResults[] so the caller can add them.
 // Scoring: +50 genre match, +0..40 mood closeness, +20 era match, +5 recency.
@@ -251,6 +285,53 @@ int recommendEngine(int genre, int mood, int era, int topResults[]) {
     if (genre >= 1 && genre <= 5) genrePickCount[genre]++;
 
     return shown;
+}
+
+// FEATURE 1: get a recommendation, then offer to add songs. -1 goes back.
+void getRecommendation() {
+    cout << "\nChoose a genre:\n";
+    cout << "  1. Pop\n  2. Rock\n  3. Hip-Hop / Rap\n";
+    cout << "  4. Electronic / Dance\n  5. Classical\n";
+    int genre = readIntRange("Your choice (1-5)", 1, 5, true);
+    if (genre == -1) return;
+
+    cout << "\nHow energetic do you feel? (1 = very chill ... 5 = very hyped)\n";
+    int mood = readIntRange("Your energy level (1-5)", 1, 5, true);
+    if (mood == -1) return;
+
+    cout << "\nPick an era:\n";
+    cout << "  1. Classic (before 2000)\n  2. 2000s\n  3. 2010s and newer\n";
+    int era = readIntRange("Your choice (1-3)", 1, 3, true);
+    if (era == -1) return;
+
+    int topResults[3];
+    int numResults = recommendEngine(genre, mood, era, topResults);
+
+    offerToAddSongs(topResults, numResults);
+
+    int rating = readIntRange("\nRate this recommendation (1-5)", 1, 5, true);
+    if (rating == -1) return;
+    if (rating >= 4 && rating <= 5) cout << "    Awesome! Enjoy the music.\n";
+    else if (rating == 3)           cout << "    Thanks - we'll fine-tune next time.\n";
+    else                            cout << "    Sorry about that - your feedback helps us improve.\n";
+}
+
+// FEATURE 2: show the session playlist.
+void showPlaylist() {
+    cout << "\n----------------------------------------------------------------\n";
+    cout << "   YOUR SESSION PLAYLIST (" << playlistCount << " songs)\n";
+    cout << "----------------------------------------------------------------\n";
+    if (playlistCount == 0) {
+        cout << "   Your playlist is empty. Get a recommendation and add songs!\n";
+        return;
+    }
+    for (int i = 0; i < playlistCount; i++) {
+        int idx = playlist[i];
+        cout << "   " << (i + 1) << ". " << library[idx].title
+             << " - " << library[idx].artist
+             << " (" << genreName(library[idx].genre) << ", "
+             << library[idx].year << ")\n";
+    }
 }
 
 int main()
