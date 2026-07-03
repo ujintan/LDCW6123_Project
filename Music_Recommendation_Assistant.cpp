@@ -368,6 +368,29 @@ void searchByArtist() {
     offerToAddSongs(results, found);
 }
 
+// FEATURE 5: listening statistics.
+void showStats() {
+    cout << "\n----------------------------------------------------------------\n";
+    cout << "   YOUR LISTENING STATISTICS\n";
+    cout << "----------------------------------------------------------------\n";
+    cout << "   Recommendations generated : " << totalRecommendations << "\n";
+    cout << "   Songs in playlist         : " << playlistCount << "\n";
+
+    int favGenre = 0, favCount = 0;                 // favourite genre (if-else)
+    for (int gg = 1; gg <= 5; gg++) {
+        if (genrePickCount[gg] > favCount) {
+            favCount = genrePickCount[gg];
+            favGenre = gg;
+        }
+    }
+
+    if (favGenre == 0)
+        cout << "   Favourite genre           : (none yet)\n";
+    else
+        cout << "   Favourite genre           : " << genreName(favGenre)
+             << " (" << favCount << " time(s))\n";
+}
+
 // FEATURE 4: browse the library by genre (or all), then offer to add.
 void browseLibrary() {
     cout << "\n----------------------------------------------------------------\n";
