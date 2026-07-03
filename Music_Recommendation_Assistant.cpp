@@ -90,6 +90,89 @@ int  playlistCount = 0;
 int  totalRecommendations = 0;
 int  genrePickCount[6] = {0,0,0,0,0,0};   // index 1..5 used
 
+// Safely read an integer (prevents crashes on letters/symbols).
+bool readInt(int &value) {
+    cin >> value;
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return false;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    return true;
+}
+
+// Keep asking until the user enters a whole number within [minVal, maxVal].
+// If allowBack is true, the user may type -1 to go back (returns -1).
+int readIntRange(const string &prompt, int minVal, int maxVal, bool allowBack) {
+    int value;
+    while (true) {
+        cout << prompt;
+        if (allowBack) cout << " (or -1 to go back): ";
+        else           cout << ": ";
+
+        if (!readInt(value)) {
+            cout << "  [!] That wasn't a number. Please try again.\n";
+            continue;
+        }
+        if (allowBack && value == -1) return -1;
+        if (value < minVal || value > maxVal) {
+            cout << "  [!] Please enter a number between "
+                 << minVal << " and " << maxVal << ".\n";
+            continue;
+        }
+        return value;
+    }
+}
+
+// Clear the screen (Windows: cls, Linux/Mac: clear).
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// Pause until the user presses Enter.
+void pause() {
+    cout << "\nPress Enter to return to the menu...";
+    cin.get();
+}
+
+// Convert a string to lower case (for case-insensitive search).
+string toLower(string text) {
+    for (int i = 0; i < (int)text.length(); i++)
+        text[i] = tolower(text[i]);
+    return text;
+}
+
+// Convert a genre number into its name (switch-case).
+string genreName(int g) {
+    switch (g) {
+        case 1: return "Pop";
+        case 2: return "Rock";
+        case 3: return "Hip-Hop / Rap";
+        case 4: return "Electronic / Dance";
+        case 5: return "Classical";
+        default:return "Unknown";
+    }
+}
+
+// The welcome banner, shown at the top of every page.
+void showWelcome() {
+    cout << "================================================================\n";
+    cout << "                MUSIC RECOMMENDATION ASSISTANT                  \n";
+    cout << "        A mini 'Discover Weekly' - inspired by Spotify          \n";
+    cout << "================================================================\n\n";
+}
+
+// Start a fresh page: clear the screen then re-print the banner.
+void newPage() {
+    clearScreen();
+    showWelcome();
+}
+
 int main()
 {
     return 0;
