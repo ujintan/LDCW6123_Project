@@ -421,7 +421,37 @@ void browseLibrary() {
     offerToAddSongs(results, count);
 }
 
-int main()
-{
+int main() {
+    int choice = -1;
+
+    while (choice != 0) {
+        newPage();                                  // banner on every page
+
+        cout << "================= MAIN MENU =================\n";
+        cout << "  1. Get a music recommendation\n";
+        cout << "  2. View my playlist\n";
+        cout << "  3. Search songs by artist\n";
+        cout << "  4. Browse the song library\n";
+        cout << "  5. View my listening stats\n";
+        cout << "  0. Exit\n";
+        cout << "============================================\n";
+
+        choice = readIntRange("Enter your choice", 0, 5, false);
+
+        switch (choice) {                           // switch-case drives the menu
+            case 1: newPage(); getRecommendation(); pause(); break;
+            case 2: newPage(); showPlaylist();      pause(); break;
+            case 3: newPage(); searchByArtist();    pause(); break;
+            case 4: newPage(); browseLibrary();     pause(); break;
+            case 5: newPage(); showStats();         pause(); break;
+            case 0:
+                newPage();
+                cout << "================================================================\n";
+                cout << " Thanks for using the Music Recommendation Assistant!\n";
+                cout << " Keep discovering new music - just like on Spotify.\n";
+                cout << "================================================================\n";
+                break;
+        }
+    }
     return 0;
 }
