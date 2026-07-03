@@ -334,6 +334,40 @@ void showPlaylist() {
     }
 }
 
+// FEATURE 3: search songs by artist (case-insensitive), then offer to add.
+void searchByArtist() {
+    cout << "\nSearch for songs by artist.\n";
+    cout << "  (try an artist like \"Adele\", \"Drake\", \"Queen\" or \"Beethoven\")\n";
+    cout << "Enter an artist name (or just press Enter to go back): ";
+    string query;
+    getline(cin, query);
+    if (query.empty()) {
+        cout << "   No search entered - going back to the menu.\n";
+        return;
+    }
+
+    string queryLower = toLower(query);
+    int results[LIBRARY_SIZE];
+    int found = 0;
+
+    cout << "\n   SEARCH RESULTS for \"" << query << "\":\n";
+    for (int i = 0; i < LIBRARY_SIZE; i++) {
+        if (toLower(library[i].artist).find(queryLower) != string::npos) {
+            results[found] = i;
+            cout << "   " << (found + 1) << ". " << library[i].title
+                 << " (" << library[i].artist << ", " << library[i].year << ")\n";
+            found++;
+        }
+    }
+
+    if (found == 0) {
+        cout << "   No songs found for that artist. Please try another name.\n";
+        return;
+    }
+    cout << "   (" << found << " song(s) found)\n";
+    offerToAddSongs(results, found);
+}
+
 int main()
 {
     return 0;
