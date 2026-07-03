@@ -368,6 +368,36 @@ void searchByArtist() {
     offerToAddSongs(results, found);
 }
 
+// FEATURE 4: browse the library by genre (or all), then offer to add.
+void browseLibrary() {
+    cout << "\n----------------------------------------------------------------\n";
+    cout << "   SONG LIBRARY\n";
+    cout << "----------------------------------------------------------------\n";
+    cout << "Which genre would you like to browse?\n";
+    cout << "  0. All genres\n  1. Pop\n  2. Rock\n  3. Hip-Hop / Rap\n";
+    cout << "  4. Electronic / Dance\n  5. Classical\n";
+
+    int g = readIntRange("Your choice (0-5)", 0, 5, true);
+    if (g == -1) return;
+
+    int results[LIBRARY_SIZE];
+    int count = 0;
+
+    cout << "\n";
+    for (int i = 0; i < LIBRARY_SIZE; i++) {
+        if (g == 0 || library[i].genre == g) {     // all, or matching genre
+            results[count] = i;
+            cout << "   " << (count + 1) << ". " << library[i].title
+                 << " - " << library[i].artist
+                 << " (" << genreName(library[i].genre) << ", "
+                 << library[i].year << ")\n";
+            count++;
+        }
+    }
+    cout << "\n   (" << count << " song(s) listed)\n";
+    offerToAddSongs(results, count);
+}
+
 int main()
 {
     return 0;
